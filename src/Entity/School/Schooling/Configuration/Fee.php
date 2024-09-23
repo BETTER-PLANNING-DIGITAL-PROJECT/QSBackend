@@ -13,6 +13,7 @@ use App\Controller\School\Schooling\Configuration\DeleteFeeController;
 use App\Controller\School\Schooling\Configuration\ImportFeeController;
 use App\Controller\School\Schooling\Configuration\PostFeeController;
 use App\Controller\School\Schooling\Configuration\PutFeeController;
+use App\Entity\Product\Unit;
 use App\Entity\Setting\Finance\PaymentGateway;
 use App\Entity\Budget\BudgetLine;
 use App\Entity\Security\Institution\Institution;
@@ -210,6 +211,12 @@ class Fee
     #[ORM\Column(nullable: true)]
     #[Groups(['get:Fee:collection'])]
     private ?bool $isPaymentFee = null;
+
+    #[ORM\ManyToOne]
+    private ?Unit $unit = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $defaultQuantity = null;
 
     public function __construct(){
         $this->createdAt = new \DateTimeImmutable();
@@ -497,6 +504,30 @@ class Fee
     public function setIsPaymentFee(?bool $isPaymentFee): self
     {
         $this->isPaymentFee = $isPaymentFee;
+
+        return $this;
+    }
+
+    public function getUnit(): ?Unit
+    {
+        return $this->unit;
+    }
+
+    public function setUnit(?Unit $unit): self
+    {
+        $this->unit = $unit;
+
+        return $this;
+    }
+
+    public function getDefaultQuantity(): ?float
+    {
+        return $this->defaultQuantity;
+    }
+
+    public function setDefaultQuantity(?float $defaultQuantity): self
+    {
+        $this->defaultQuantity = $defaultQuantity;
 
         return $this;
     }
