@@ -1,0 +1,111 @@
+<?php
+
+namespace App\Controller\Report\Inventory;
+
+use App\Entity\Billing\Sale\SaleSettlement;
+use App\Entity\Inventory\Stock;
+use App\Entity\Inventory\StockMovement;
+use App\Entity\Security\User;
+use App\Repository\Billing\Sale\SaleInvoiceRepository;
+use App\Repository\Billing\Sale\SaleSettlementRepository;
+use App\Repository\Inventory\StockMovementRepository;
+use App\Repository\Inventory\StockRepository;
+use App\Repository\Inventory\WarehouseRepository;
+use App\Repository\School\Schooling\Configuration\SchoolClassRepository;
+use App\Repository\School\Schooling\Configuration\SchoolRepository;
+use App\Repository\School\Schooling\Registration\StudentRegistrationRepository;
+use App\Repository\Security\Institution\BranchRepository;
+use App\Repository\Security\Session\YearRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Attribute\AsController;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+
+#[AsController]
+class GetStockMovementByBranchReportController extends AbstractController
+{
+
+    public function __construct(Request $req, EntityManagerInterface $entityManager,
+                                private readonly TokenStorageInterface $tokenStorage,  StockMovementRepository $stockMovementRepository, BranchRepository $branchRepository)
+    {
+        $this->req = $req;
+        $this->entityManager = $entityManager;
+        $this->stockMovementRepository = $stockMovementRepository;
+        $this->branchRepository = $branchRepository;
+    }
+
+    #[Route('/api/get/stock-movement-by-branch/report', name: 'app_get_stock_movement_by_branch_report')]
+    public function getStockMovementByBranch(Request $request): JsonResponse
+    {
+        $stockMovementData = json_decode($request->getContent(), true);
+
+        $branch = $this->branchRepository->find($this->getIdFromApiResourceId($stockMovementData['branch']));
+
+        $filteredStockMovements = [];
+
+        $dql = 'SELECT id, item_id, from_warehouse_id, from_location_id, to_location_id, from_warehouse_id, quantity, unit_cost, note FROM inventory_stock_movement s 
+            WHERE branch_id = '.$branch->getId();
+
+
+        if (isset($stockMovementData['branch'])){
+            $branch = $this->branchRepository->find($this->getIdFromApiResourceId($stockMovementData['branch']));
+
+            $dql = $dql .' AND branch_id = '. $branch->getId();
+        }
+
+        $conn = $this->entityManager->getConnection();
+        $resultSet = $conn->executeQuery($dql);
+        $rows = $resultSet->fetchAllAssociative();
+
+        foreach ($rows as $row) {
+            $stockMovement = $this->stockMovementRepository->find($row['id']);
+            $filteredStockMovements[] = $this->bindStockMovement($stockMovement);
+        }
+
+        return $this->json($filteredStockMovements);
+    }
+
+    public function bindStockMovement(StockMovement $stockMovement): array
+    {
+        return [
+            'id' => $stockMovement->getId(),
+            'dateAt' => $stockMovement->getStockAt()->format('d/m/y H:i'),
+            'reference' => $stockMovement->getReference(),
+            'item' => $stockMovement->getItem() ? $stockMovement->getItem()->getName() : '',
+            'from' => $stockMovement->getFromWarehouse()->getName(),
+            'to' => $stockMovement->getToWarehouse()->getName(),
+            'quantity' => $stockMovement->getQuantity(),
+        ];
+    }
+
+
+
+    public function getUser(): ?User
+    {
+        $token = $this->tokenStorage->getToken();
+
+        if (!$token) {
+            return null;
+        }
+
+        $user = $token->getUser();
+
+        if (!$user instanceof User) {
+            return null;
+        }
+
+        return $user;
+    }
+
+    public function getIdFromApiResourceId(string $apiId){
+        $lastIndexOf = strrpos($apiId, '/');
+        $id = substr($apiId, $lastIndexOf+1);
+        return intval($id);
+    }
+}
+
+
+
