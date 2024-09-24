@@ -10,6 +10,7 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use App\Controller\DeleteSelectedResourceController;
 use App\Controller\School\Schooling\Configuration\DeleteFeeController;
+use App\Controller\School\Schooling\Configuration\GetFeeController;
 use App\Controller\School\Schooling\Configuration\ImportFeeController;
 use App\Controller\School\Schooling\Configuration\PostFeeController;
 use App\Controller\School\Schooling\Configuration\PutFeeController;
@@ -24,7 +25,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Annotation\Groups;
 
@@ -41,6 +41,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
         ),
         new GetCollection(
             uriTemplate: '/get/fee',
+            controller: GetFeeController::class,
             order: ['id' => 'DESC'],
             normalizationContext: [
                 'groups' => ['get:Fee:collection'],
@@ -104,16 +105,16 @@ use Symfony\Component\Serializer\Annotation\Groups;
         ),
     ]
 )]
-#[UniqueEntity(
-    fields: ['code', 'costArea', 'class', 'year'],
-    message: 'this fee already exist',
-    errorPath: 'code'
-)]
-#[UniqueEntity(
-    fields: ['name', 'costArea', 'class', 'year'],
-    message: 'this fee already exist',
-    errorPath: 'name'
-)]
+//#[UniqueEntity(
+//    fields: ['code', 'costArea', 'class', 'year'],
+//    message: 'this fee already exist',
+//    errorPath: 'code'
+//)]
+//#[UniqueEntity(
+//    fields: ['name', 'costArea', 'class', 'year'],
+//    message: 'this fee already exist',
+//    errorPath: 'name'
+//)]
 class Fee
 {
     #[ORM\Id]

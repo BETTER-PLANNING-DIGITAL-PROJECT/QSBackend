@@ -7,6 +7,7 @@ use App\Entity\Security\User;
 use App\Repository\Budget\BudgetLineRepository;
 use App\Repository\School\Schooling\Configuration\CostAreaRepository;
 use App\Repository\School\Schooling\Configuration\CycleRepository;
+use App\Repository\School\Schooling\Configuration\FeeRepository;
 use App\Repository\School\Schooling\Configuration\LevelRepository;
 use App\Repository\School\Schooling\Configuration\PensionSchemeRepository;
 use App\Repository\School\Schooling\Configuration\SchoolClassRepository;
@@ -15,6 +16,7 @@ use App\Repository\School\Schooling\Configuration\SpecialityRepository;
 use App\Repository\School\Schooling\Configuration\TrainingTypeRepository;
 use App\Repository\Security\Institution\InstitutionRepository;
 use App\Repository\Security\Session\YearRepository;
+use App\Repository\Security\SystemSettingsRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -30,9 +32,38 @@ class PostFeeController extends AbstractController
     }
 
     public function __invoke(mixed $data, SpecialityRepository $specialityRepository, TrainingTypeRepository $trainingTypeRepository, CycleRepository $cycleRepository, LevelRepository $levelRepository, BudgetLineRepository $budgetLineRepository, EntityManagerInterface $entityManager, Request $request, InstitutionRepository $institutionRepository, YearRepository $yearRepository, CostAreaRepository $areaRepository,
-                             SchoolRepository $schoolRepository, SchoolClassRepository $schoolClassRepository, PensionSchemeRepository $pensionSchemeRepository)
+                             SchoolRepository $schoolRepository, SchoolClassRepository $schoolClassRepository, PensionSchemeRepository $pensionSchemeRepository, SystemSettingsRepository $systemSettingsRepository, FeeRepository $feeRepository)
     {
         $requestData = json_decode($request->getContent(), true);
+        $school = !isset($requestData['school']) ? null : $schoolRepository->find($this->getIdFromApiResourceId($requestData['school']));
+        $class = !isset($requestData['class']) ? null : $schoolClassRepository->find($this->getIdFromApiResourceId($requestData['class']));
+
+        $code = $requestData['code'];
+        $name = $requestData['name'];
+
+        $systemSettings = $systemSettingsRepository->findOneBy([]);
+
+        $schools = $schoolRepository->findOneBy(['branch' => $this->getUser()->getBranch()]);
+        if($systemSettings) {
+            if ($systemSettings->isIsBranches()) {
+                $duplicateCheckCode = $feeRepository->findOneBy(['code' => $code, 'school' => $school, 'class' => $class, 'year' => $this->getUser()->getCurrentYear()]);
+            } else {
+                $duplicateCheckCode = $feeRepository->findOneBy(['code' => $code, 'school' => $schools, 'class' => $class, 'year' => $this->getUser()->getCurrentYear()]);
+            }
+            if ($duplicateCheckCode) {
+                return new JsonResponse(['hydra:description' => 'This code already exists in this school.'], 400);
+            }
+        }
+        if($systemSettings) {
+            if ($systemSettings->isIsBranches()) {
+                $duplicateCheckName = $feeRepository->findOneBy(['name' => $name, 'school' => $school, 'class' => $class, 'year' => $this->getUser()->getCurrentYear()]);
+            } else {
+                $duplicateCheckName = $feeRepository->findOneBy(['name' => $name, 'school' => $schools, 'class' => $class, 'year' => $this->getUser()->getCurrentYear()]);
+            }
+            if ($duplicateCheckName) {
+                return new JsonResponse(['hydra:description' => 'This name already exists in this school.'], 400);
+            }
+        }
 
         $fee = new Fee();
         $fee->setCode($requestData['code']);
@@ -48,14 +79,13 @@ class PostFeeController extends AbstractController
 
         $fee->setYear($year);
 
-        if (isset($requestData['school'])){
-            // START: Filter the uri to just take the id and pass it to our object
-            $filter = preg_replace("/[^0-9]/", '', $requestData['school']);
-            $filterId = intval($filter);
-            $school = $schoolRepository->find($filterId);
-            // END: Filter the uri to just take the id and pass it to our object
-
-            $fee->setSchool($school);
+        $schools = $schoolRepository->findOneBy(['branch' => $this->getUser()->getBranch()]);
+        if($systemSettings) {
+            if ($systemSettings->isIsBranches()) {
+                $fee->setSchool($school);
+            } else {
+                $fee->setSchool($schools);
+            }
         }
 
         // START: Filter the uri to just take the id and pass it to our object
@@ -167,6 +197,12 @@ class PostFeeController extends AbstractController
         $entityManager->flush();
 
         return $fee;
+    }
+
+    public function getIdFromApiResourceId(string $apiId){
+        $lastIndexOf = strrpos($apiId, '/');
+        $id = substr($apiId, $lastIndexOf+1);
+        return intval($id);
     }
 
     public function getUser(): ?User

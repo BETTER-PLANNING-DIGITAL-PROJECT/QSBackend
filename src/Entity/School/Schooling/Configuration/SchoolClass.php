@@ -39,7 +39,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
         ),
 
         new Get(
-            uriTemplate: '/get/customer/registration/by/class/{id}',
+            uriTemplate: '/get/student/registration/by/class/{id}',
             requirements: ['id' => '\d+'],
             controller: GetRegistrationByCustomerUsingClassController::class,
             normalizationContext: [
