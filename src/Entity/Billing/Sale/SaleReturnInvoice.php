@@ -336,7 +336,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
             deserialize: false
         ),
 
-        // Validate settlement
+        // Validate settlement 
         new Post(
             uriTemplate: '/create/validate/sale-return-invoice/{id}/settlement',
             requirements: ['id' => '\d+'],

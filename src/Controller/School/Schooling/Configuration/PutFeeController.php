@@ -4,6 +4,7 @@ namespace App\Controller\School\Schooling\Configuration;
 
 use App\Entity\Security\User;
 use App\Repository\Budget\BudgetLineRepository;
+use App\Repository\Product\UnitRepository;
 use App\Repository\School\Schooling\Configuration\CostAreaRepository;
 use App\Repository\School\Schooling\Configuration\CycleRepository;
 use App\Repository\School\Schooling\Configuration\FeeRepository;
@@ -29,7 +30,7 @@ class PutFeeController extends AbstractController
     {
     }
 
-    public function __invoke(mixed $data, FeeRepository $feeRepository ,Request $request, SpecialityRepository $specialityRepository, TrainingTypeRepository $trainingTypeRepository, CycleRepository $cycleRepository, LevelRepository $levelRepository, BudgetLineRepository $budgetLineRepository, EntityManagerInterface $entityManager, InstitutionRepository $institutionRepository, YearRepository $yearRepository, CostAreaRepository $areaRepository,
+    public function __invoke(mixed $data, UnitRepository $unitRepository, FeeRepository $feeRepository ,Request $request, SpecialityRepository $specialityRepository, TrainingTypeRepository $trainingTypeRepository, CycleRepository $cycleRepository, LevelRepository $levelRepository, BudgetLineRepository $budgetLineRepository, EntityManagerInterface $entityManager, InstitutionRepository $institutionRepository, YearRepository $yearRepository, CostAreaRepository $areaRepository,
                              SchoolRepository $schoolRepository, SchoolClassRepository $schoolClassRepository, PensionSchemeRepository $pensionSchemeRepository)
     {
         $id = $request->get('id');
@@ -159,6 +160,18 @@ class PutFeeController extends AbstractController
 
             $fee->setTrainingType($trainingType);
         }
+
+        if (isset($requestData['unit'])){
+            // START: Filter the uri to just take the id and pass it to our object
+            $filter = preg_replace("/[^0-9]/", '', $requestData['unit']);
+            $filterId = intval($filter);
+            $unit = $unitRepository->find($filterId);
+            // END: Filter the uri to just take the id and pass it to our object
+
+            $fee->setUnit($unit);
+        }
+
+        $fee->setDefaultQuantity($requestData['defaultQuantity']);
 
         /*$item = $entityManager->getRepository(Item::class)->findOneBy(['fee' => $fee]);
         if ($item){

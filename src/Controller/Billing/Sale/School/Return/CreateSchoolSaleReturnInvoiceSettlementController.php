@@ -106,10 +106,10 @@ class CreateSchoolSaleReturnInvoiceSettlementController extends AbstractControll
         }
         // END: Filter the uri to just take the id and pass it to our object
 
-        if ($saleReturnInvoice->getSaleInvoice()->getAmountPaid() < $request->get('amountPay')){
-            return new JsonResponse(['hydra:title' => 'Amount to return cannot be more than the one paid'], Response::HTTP_BAD_REQUEST, ['Content-Type', 'application/json']);
+        $sumSettlementPaid = $settlementRepository->sumReturnSettlementValidatedAmountByInvoice($saleReturnInvoice)[0][1];
+        if ($saleReturnInvoice->getSaleInvoice()->getAmountPaid() < $request->get('amountPay') + $sumSettlementPaid){
+            return new JsonResponse(['hydra:title' => 'Amount to return cannot be more than the one paid : '. $saleReturnInvoice->getSaleInvoice()->getAmountPaid()], Response::HTTP_BAD_REQUEST, ['Content-Type', 'application/json']);
         }
-
 
         $settlement->setSaleReturnInvoice($saleReturnInvoice);
         $settlement->setStudentRegistration($saleReturnInvoice->getStudentRegistration());

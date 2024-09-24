@@ -47,6 +47,21 @@ class FeeRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    /**
+     * @return Fee[] Returns an array of Fee objects
+     */
+    public function findFeeByClass($value): array
+    {
+        return $this->createQueryBuilder('t')
+            ->andWhere('t.class = :val')
+            ->setParameter('val', $value)
+            ->orderBy('t.id', 'ASC')
+            //->setMaxResults(10)
+            ->getQuery()
+            ->getResult()
+            ;
+    }
+
 //    /**
 //     * @return Fee[] Returns an array of Fee objects
 //     */

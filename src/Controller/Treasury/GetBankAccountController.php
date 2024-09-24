@@ -38,9 +38,11 @@ class GetBankAccountController extends AbstractController
             foreach ($bankAccounts as $bankAccount)
             {
                 $bankAccountData[] = [
+					'@id' => "/api/get/bank-account/" . $bankAccount->getId(),
                     'id'=> $bankAccount ->getId(),
                     'code'=> $bankAccount->getCodeSwift(),
                     'bank' => [
+						'@id' => "/api/get/bank/" . $bankAccount->getBank()->getId(),
                         '@type' => "Bank",
                         'id' => $bankAccount->getBank() ? $bankAccount->getBank()->getId() : '',
                         'code' => $bankAccount->getBank() ? $bankAccount->getBank()->getCode() : '',
@@ -74,9 +76,11 @@ class GetBankAccountController extends AbstractController
                        $bankAccounts = $this->bankAccountRepository->findBy(['branch' => $userBranch], ['id' => 'DESC']);
                           foreach ($bankAccounts as $bankAccount){
                               $bankAccountData[] = [
+								  '@id' => "/api/get/bank-account/" . $bankAccount->getId(),
                                   'id'=> $bankAccount ->getId(),
                                   'code'=> $bankAccount->getCodeSwift(),
                                   'bank' => [
+									  '@id' => "/api/get/bank/" . $bankAccount->getBank()->getId(),
                                       '@type' => "Bank",
                                       'id' => $bankAccount->getBank() ? $bankAccount->getBank()->getId() : '',
                                       'code' => $bankAccount->getBank() ? $bankAccount->getBank()->getCode() : '',
@@ -103,9 +107,11 @@ class GetBankAccountController extends AbstractController
                    foreach ($bankAccounts as $bankAccount) {
                        if ($bankAccount) {
                            $bankAccountData[] = [
+							   '@id' => "/api/get/bank-account/" . $bankAccount->getId(),
                                'id' => $bankAccount->getId(),
                                'code' => $bankAccount->getCodeSwift(),
                                'bank' => [
+								   '@id' => "/api/get/bank/" . $bankAccount->getBank()->getId(),
                                    '@type' => "Bank",
                                    'id' => $bankAccount->getBank() ? $bankAccount->getBank()->getId() : '',
                                    'code' => $bankAccount->getBank() ? $bankAccount->getBank()->getCode() : '',

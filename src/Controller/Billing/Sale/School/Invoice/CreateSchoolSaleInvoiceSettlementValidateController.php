@@ -190,7 +190,7 @@ class CreateSchoolSaleInvoiceSettlementValidateController extends AbstractContro
             // balance : en bas
             $cashDeskHistory->setDateAt(new \DateTimeImmutable());
 
-            $cashDeskHistory->setBranch($this->getUser()->getBranch());
+            //$cashDeskHistory->setBranch($this->getUser()->getBranch());
             $cashDeskHistory->setInstitution($this->getUser()->getInstitution());
             $cashDeskHistory->setUser($this->getUser());
             $cashDeskHistory->setYear($this->getUser()->getCurrentYear());
@@ -238,7 +238,7 @@ class CreateSchoolSaleInvoiceSettlementValidateController extends AbstractContro
             // balance : en bas
             $bankHistory->setDateAt(new \DateTimeImmutable());
 
-            $bankHistory->setBranch($this->getUser()->getBranch());
+            //$bankHistory->setBranch($this->getUser()->getBranch());
             $bankHistory->setInstitution($this->getUser()->getInstitution());
             $bankHistory->setYear($this->getUser()->getCurrentYear());
             $bankHistory->setUser($this->getUser());
