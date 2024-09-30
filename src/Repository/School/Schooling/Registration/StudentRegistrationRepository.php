@@ -288,6 +288,24 @@ class StudentRegistrationRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    /**
+     * @return StudentRegistration[] Returns an array of Customer objects
+     */
+    public function findStudentRegistrationByClass($value): array
+    {
+        return $this->createQueryBuilder('c')
+            //->innerJoin('c.studentRegistration', 's', 'WITH', 'c.studentRegistration = s.id')
+            ->andWhere('c.studentRegistration IS NULL')
+            ->andWhere('c.classe = :val')
+            ->andWhere('c.status = :state')
+            ->setParameter('val', $value)
+            ->setParameter('state', 'registered')
+            ->orderBy('c.id', 'ASC')
+            ->getQuery()
+            ->getResult()
+            ;
+    }
+
 
 //    /**
 //     * @return array Returns the last 5 StudentRegistration objects

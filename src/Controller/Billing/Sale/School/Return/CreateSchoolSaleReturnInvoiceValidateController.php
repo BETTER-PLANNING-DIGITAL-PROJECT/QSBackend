@@ -130,6 +130,7 @@ class CreateSchoolSaleReturnInvoiceValidateController extends AbstractController
             return new JsonResponse(['hydra:title' => 'Amount can not be less or equal to zero'], Response::HTTP_BAD_REQUEST, ['Content-Type', 'application/json']);
         }
 
+
         if ($request->get('amountPay') > $saleReturnInvoice->getVirtualBalance())
         {
             return new JsonResponse(['hydra:title' => 'Amount can not be more than balance'], Response::HTTP_BAD_REQUEST, ['Content-Type', 'application/json']);
@@ -140,9 +141,9 @@ class CreateSchoolSaleReturnInvoiceValidateController extends AbstractController
             return new JsonResponse(['hydra:title' => 'Student not found!'], Response::HTTP_BAD_REQUEST, ['Content-Type', 'application/json']);
         }
 
-        if ($saleReturnInvoice->getSaleInvoice()->getAmountPaid() < $request->get('amountPay')){
-            return new JsonResponse(['hydra:title' => 'Amount to return cannot be more than the one paid'], Response::HTTP_BAD_REQUEST, ['Content-Type', 'application/json']);
-
+        $sumSettlementPaid = $saleSettlementRepository->sumReturnSettlementValidatedAmountByInvoice($saleReturnInvoice)[0][1];
+        if ($saleReturnInvoice->getSaleInvoice()->getAmountPaid() < $request->get('amountPay') + $sumSettlementPaid){
+            return new JsonResponse(['hydra:title' => 'Amount to return cannot be more than the one paid : '. $saleReturnInvoice->getSaleInvoice()->getAmountPaid()], Response::HTTP_BAD_REQUEST, ['Content-Type', 'application/json']);
         }
 
         // CREATE SETTLEMENT SECTION

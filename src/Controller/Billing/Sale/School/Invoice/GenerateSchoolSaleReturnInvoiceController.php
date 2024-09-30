@@ -77,12 +77,12 @@ class GenerateSchoolSaleReturnInvoiceController extends AbstractController
 
         $saleReturnInvoice->setInvoiceNumber($uniqueNumber);
         $saleReturnInvoice->setStudentRegistration($saleInvoice->getStudentRegistration());
-        $saleReturnInvoice->setAmount($saleInvoice->getAmount());
+        $saleReturnInvoice->setAmount($saleInvoice->getAmountPaid());
         $saleReturnInvoice->setAmountPaid(0);
         $saleReturnInvoice->setShippingAddress($saleInvoice->getShippingAddress());
-        $saleReturnInvoice->setTtc($saleInvoice->getTtc());
-        $saleReturnInvoice->setBalance($saleInvoice->getTtc());
-        $saleReturnInvoice->setVirtualBalance($saleInvoice->getTtc());
+        $saleReturnInvoice->setTtc($saleInvoice->getAmountPaid());
+        $saleReturnInvoice->setBalance($saleInvoice->getAmountPaid());
+        $saleReturnInvoice->setVirtualBalance($saleInvoice->getAmountPaid());
         $saleReturnInvoice->setStatus('draft');
         $saleReturnInvoice->setIsStandard($saleInvoice->isIsStandard());
         $saleReturnInvoice->setInvoiceAt(new \DateTimeImmutable());

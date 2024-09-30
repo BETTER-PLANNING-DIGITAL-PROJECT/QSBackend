@@ -39,12 +39,12 @@ class DeleteSaleReturnInvoiceFeeController extends AbstractController
 
         $entityManager->flush();
 
-        // update sale invoice
+        // update sale return invoice
         $amount = $saleReturnInvoiceFeeRepository->saleReturnInvoiceHtAmount($saleReturnInvoice)[0][1];
         $saleReturnInvoice->setAmount($amount);
 
         $discountAmount = 0;
-        $saleReturnInvoiceFees = $saleReturnInvoiceFeeRepository->findBy(['saleInvoice' => $saleReturnInvoice]);
+        $saleReturnInvoiceFees = $saleReturnInvoiceFeeRepository->findBy(['saleReturnInvoice' => $saleReturnInvoice]);
         foreach ($saleReturnInvoiceFees as $invoiceFee){
             $discountAmount += $invoiceFee->getDiscountAmount();
         }
